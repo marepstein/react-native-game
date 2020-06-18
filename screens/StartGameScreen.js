@@ -5,17 +5,19 @@ import {
   Text,
   Button,
   TouchableWithoutFeedback,
-  Keyboard
+  Keyboard,
+  Alert
 } from 'react-native'
 
 import Card from '../components/Card.js'
 import Colours from '../constants/Colours'
+import NumberContainer from '../components/NumberContainer'
 import Input from '../components/Input'
 
 const StartScreen = (props) => {
   const [enteredValue, setEnteredValue] = useState('')
   const [confirmed, setConfirmed] = useState(false)
-  // gives users the choice to make sure their inputted number is what they wanted to submit
+  // gives users the choice to make sure their inputted number is what they wanted to submit -- 'has the user confirmed' state?
   const [inputNumber, setInputNumber] = useState()
 
   const numberInputHandler = (inputText) => {
@@ -27,22 +29,38 @@ const StartScreen = (props) => {
   const resetInputHandler = () => {
     setEnteredValue('')
     setConfirmed(false)
+    // because the user no longer confirms the value
   }
 
   const confirmInputHandler = () => {
     const chosenNum = parseInt(enteredValue)
-    if (chosenNum === isNaN || chosenNum <= 0 || chosenNum > 99) {
+    if (isNaN(chosenNum) || chosenNum <= 0 || chosenNum > 99) {
+      Alert.alert('Invalid number!', 'Number must be between 1 and 99', [
+        { text: 'OK', style: 'cancel ', onPress: resetInputHandler }
+      ])
       return
     }
     setConfirmed(true)
     setInputNumber(chosenNum)
     setEnteredValue('')
+    Keyboard.dismiss()
   }
 
   let confirmedOutput
   if (confirmed) {
-    confirmedOutput = <Text>Chosen Number: {inputNumber} </Text>
+    confirmedOutput = (
+      <View style={styles.chosenNumberContainer}>
+        <Text>Chosen Number:</Text>
+        <NumberContainer>{inputNumber}</NumberContainer>
+        <Button
+          title="START GAME"
+          onPress={() => props.onStartGame(inputNumber)}
+        />
+      </View>
+    )
   }
+  // this basically gives us the feedback that the chosen number is confirmed
+  // opening and closing tags for numbercontainer because we use props.children
 
   return (
     <TouchableWithoutFeedback
@@ -118,6 +136,10 @@ const styles = StyleSheet.create({
   input: {
     width: '40%',
     textAlign: 'center'
+  },
+  chosenNumberContainer: {
+    marginTop: 30,
+    alignItems: 'center'
   }
 })
 
